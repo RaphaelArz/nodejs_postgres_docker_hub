@@ -20,7 +20,16 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/myapp:latest
 
-      - name: deploy on server
+      - name: copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ SERVER_USER }}
+          key: ${{ SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml,init-db.sql"
+          target: "~/app"
+
+      - name: deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -28,5 +37,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-            docker run ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-
+            docker compose up -d
