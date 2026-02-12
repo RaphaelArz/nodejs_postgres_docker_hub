@@ -38,7 +38,7 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
             docker run -d \
-            --name nodejs_app \
+            --name nodejs_app_raphael \
             -p 3174:3000 \
             raphaelarz/myapp:latest
 
