@@ -30,7 +30,6 @@ jobs:
             # Créer un réseau interne Docker pour que Node et Postgres communiquent
             docker network create node_postgres_net || true
 
-            # Lancer Postgres si il n'existe pas ou le recréer
             docker stop postgres_db_node || true
             docker rm postgres_db_node || true
             docker run -d \
@@ -44,14 +43,13 @@ jobs:
               -v ~/app/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql \
               postgres:13
 
-            # Lancer Node.js, après avoir stoppé et supprimé l'ancien conteneur
             docker stop nodejs_app_raphael || true
             docker rm nodejs_app_raphael || true
             docker run -d \
               --name nodejs_app_raphael \
               --network node_postgres_net \
               -p 3174:3000 \
-              -e DATABASE_URL=postgres://postgres:mysecretpassword@postgres_db_node:5432/mydb \
+              -e DATABASE_URL=postgres://postgres:mysecretpassword@postgres_db_node:3173/mydb \
               -e NODE_ENV=development \
               -e CHOKIDAR_USEPOLLING=true \
               ${{ secrets.DOCKER_USERNAME }}/myapp:latest
