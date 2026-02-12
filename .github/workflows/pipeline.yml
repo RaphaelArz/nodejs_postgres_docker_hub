@@ -51,6 +51,7 @@ jobs:
 
             docker pull ${{ secrets.DOCKER_USERNAME }}/nodejs_postgres:latest
 
-            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml down --remove-orphans
             docker compose -f docker-compose.prod.yml up -d
+
 
