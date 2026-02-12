@@ -3,7 +3,7 @@ const router = express.Router();
 const projectController = require('../controllers/project.controller.js');
 
 router.get('/', (req, res) => {
-  res.json({ message: "rarara" });
+  res.json({ message: "raraphe" });
 });
 
 // Route pour obtenir le projet avec le plus gros budget
