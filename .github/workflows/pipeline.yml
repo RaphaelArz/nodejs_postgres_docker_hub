@@ -20,14 +20,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/myapp:latest
 
-      - name: copy files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.yml,init-db.sql"
-          target: "~/app"
+      # - name: copy files to server
+      #   uses: appleboy/scp-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.SERVER_IP }}
+      #     username: ${{ secrets.SERVER_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     source: "docker-compose.yml,init-db.sql"
+      #     target: "~/app"
 
       - name: deploy to server
         uses: appleboy/ssh-action@v1.0.3
@@ -36,6 +36,9 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd ~/app
             docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-            docker compose up -d
+            docker run -d \
+            --name nodejs_app \
+            -p 3174:3000 \
+            raphaelarz/myapp:latest
+
