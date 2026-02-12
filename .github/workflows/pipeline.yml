@@ -51,7 +51,7 @@ jobs:
 
             docker pull ${{ secrets.DOCKER_USERNAME }}/nodejs_postgres:latest
 
-            docker compose -f docker-compose.prod.yml -p APP_RAPHAEL down
-            docker compose -f docker-compose.prod.yml -p APP_RAPHAEL up -d
+            docker compose -f docker-compose.prod.yml -p appraphael down
+            docker compose -f docker-compose.prod.yml -p appraphael up -d
 
 
