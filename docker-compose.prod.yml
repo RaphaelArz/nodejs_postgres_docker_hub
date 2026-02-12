@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:13
+    container_name: postgres_db_node_raphael
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: mydb
+    ports:
+      - "3173:5432"         # accessible depuis l'extérieur si nécessaire
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+
+  node:
+    image: raphaelarz/nodejs_postgres:latest   # utilise l'image Docker Hub buildée
+    container_name: nodejs_app_raphael
+    depends_on:
+      - db
+    ports:
+      - "3174:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:mysecretpassword@db:5432/mydb
+      - NODE_ENV=production
+    restart: unless-stopped
+    command: ["npm", "run", "start"]  # utiliser start en prod plutôt que dev
+
+volumes:
+  db_data:
