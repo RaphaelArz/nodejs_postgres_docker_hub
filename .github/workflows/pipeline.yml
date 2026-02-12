@@ -20,15 +20,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/myapp:latest
 
-      # - name: copy files to server
-      #   uses: appleboy/scp-action@v0.1.7
-      #   with:
-      #     host: ${{ secrets.SERVER_IP }}
-      #     username: ${{ secrets.SERVER_USER }}
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     source: "docker-compose.yml,init-db.sql"
-      #     target: "~/app"
-
       - name: deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -36,13 +27,31 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
-            docker stop nodejs_app_raphael || true
+            # Créer un réseau interne Docker pour que Node et Postgres communiquent
+            docker network create node_postgres_net || true
 
-            docker rm nodejs_app_raphael || true
-
+            # Lancer Postgres si il n'existe pas ou le recréer
+            docker stop postgres_db_node || true
+            docker rm postgres_db_node || true
             docker run -d \
-            --name nodejs_app_raphael \
-            -p 3174:3000 \
-            raphaelarz/myapp:latest
+              --name postgres_db_node \
+              --network node_postgres_net \
+              -p 3173:5432 \
+              -e POSTGRES_USER=postgres \
+              -e POSTGRES_PASSWORD=mysecretpassword \
+              -e POSTGRES_DB=mydb \
+              -v db_data:/var/lib/postgresql/data \
+              -v ~/app/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql \
+              postgres:13
 
+            # Lancer Node.js, après avoir stoppé et supprimé l'ancien conteneur
+            docker stop nodejs_app_raphael || true
+            docker rm nodejs_app_raphael || true
+            docker run -d \
+              --name nodejs_app_raphael \
+              --network node_postgres_net \
+              -p 3174:3000 \
+              -e DATABASE_URL=postgres://postgres:mysecretpassword@postgres_db_node:5432/mydb \
+              -e NODE_ENV=development \
+              -e CHOKIDAR_USEPOLLING=true \
+              ${{ secrets.DOCKER_USERNAME }}/myapp:latest
