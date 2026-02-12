@@ -27,5 +27,6 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            cd ./apps
             docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
             docker compose up -d
