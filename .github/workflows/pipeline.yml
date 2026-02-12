@@ -37,6 +37,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/myapp:latest
+            docker stop nodejs_app_raphael || true
+
+            docker rm nodejs_app_raphael || true
+
             docker run -d \
             --name nodejs_app_raphael \
             -p 3174:3000 \
